@@ -1,6 +1,6 @@
 {
   "name": "sigfig.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A TypeScript/JavaScript package that provides a comprehensive list of util functions for precise calculations with significant figure handling",
   "license": "MIT",
   "author": "SkorpionG",
