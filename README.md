@@ -423,3 +423,7 @@ This package follows the standard scientific rules for significant figures:
 ## License
 
 MIT © [SkorpionG](https://github.com/SkorpionG)
+
+## Repository
+
+[https://github.com/SkorpionG/sigfig.js](https://github.com/SkorpionG/sigfig.js)
