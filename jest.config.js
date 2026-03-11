@@ -1,5 +1,6 @@
 export default {
   preset: "ts-jest/presets/default-esm",
+  watchman: false,
   extensionsToTreatAsEsm: [".ts"],
   testEnvironment: "node",
   roots: ["<rootDir>/tests"],

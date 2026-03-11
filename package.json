@@ -37,7 +37,10 @@
     "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
     "check": "npm run typecheck && npm run format:check && npm run lint && npm run test",
     "validate": "npm run typecheck && npm run lint && npm run test",
-    "prepublishOnly": "npm run build && npm run validate"
+    "prepublishOnly": "npm run build && npm run validate",
+    "lint-staged": "lint-staged",
+    "prepare": "husky",
+    "precommit": "npm run typecheck && npm run lint-staged"
   },
   "keywords": [
     "math",
@@ -48,18 +51,20 @@
     "precise"
   ],
   "devDependencies": {
-    "@eslint/js": "^9.37.0",
+    "@eslint/js": "^9.39.4",
     "@types/big.js": "^6.2.2",
     "@types/jest": "^30.0.0",
-    "@types/node": "^24.6.2",
-    "@typescript-eslint/eslint-plugin": "^8.45.0",
-    "@typescript-eslint/parser": "^8.45.0",
-    "eslint": "^9.37.0",
+    "@types/node": "^25.4.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.0",
+    "@typescript-eslint/parser": "^8.57.0",
+    "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.4",
-    "jest": "^30.2.0",
-    "prettier": "^3.6.2",
-    "ts-jest": "^29.4.4",
+    "eslint-plugin-prettier": "^5.5.5",
+    "husky": "^9.1.7",
+    "jest": "^30.3.0",
+    "lint-staged": "^16.3.3",
+    "prettier": "^3.8.1",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
