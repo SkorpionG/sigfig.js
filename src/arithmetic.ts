@@ -144,7 +144,7 @@ export function div(a: number | string, b: number | string, toSigfigParam?: numb
     if (error instanceof Error && error.message === "Division by zero is not allowed") {
       throw error;
     }
-    throw new Error("Invalid input: both operands must be valid numbers");
+    throw new Error("Invalid input: both operands must be valid numbers", { cause: error });
   }
 }
 
@@ -193,7 +193,7 @@ export function mod(a: number | string, b: number | string, toSigfigParam?: numb
     ) {
       throw error;
     }
-    throw new Error("Invalid input: both operands must be valid numbers");
+    throw new Error("Invalid input: both operands must be valid numbers", { cause: error });
   }
 }
 
@@ -241,7 +241,7 @@ export function idiv(a: number | string, b: number | string, toSigfigParam?: num
     if (error instanceof Error && error.message === "Division by zero is not allowed") {
       throw error;
     }
-    throw new Error("Invalid input: both operands must be valid numbers");
+    throw new Error("Invalid input: both operands must be valid numbers", { cause: error });
   }
 }
 
@@ -313,7 +313,9 @@ export function pow(
     ) {
       throw error;
     }
-    throw new Error("Invalid input: both base and exponent must be valid numbers");
+    throw new Error("Invalid input: both base and exponent must be valid numbers", {
+      cause: error,
+    });
   }
 }
 
@@ -356,7 +358,7 @@ export function sqrt(value: number | string, toSigfigParam?: number): string {
     if (error instanceof Error && error.message === "Cannot take square root of negative number") {
       throw error;
     }
-    throw new Error("Invalid input: value must be a valid number");
+    throw new Error("Invalid input: value must be a valid number", { cause: error });
   }
 }
 

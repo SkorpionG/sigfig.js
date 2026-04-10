@@ -28,5 +28,8 @@
     "getSigfigForMulOrDiv",
     "toScientific",
     "toEngineering"
-  ]
+  ],
+  "specstory.cloudSync.enabled": "never",
+  "specstory.autoSave.enabled": false,
+  "specstory.helpUsImprove": false
 }

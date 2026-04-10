@@ -141,7 +141,7 @@ export function round(
   const strWithExtraPrecision = absNum.toPrecision(sigfigs + 10);
 
   // Extract all digits (remove decimal point and scientific notation)
-  let digits = "";
+  let digits: string;
 
   // Handle scientific notation to get the actual digits
   const scientificMatch = strWithExtraPrecision.match(/^(\d)\.?(\d*)e([+-]?\d+)$/i);
@@ -298,7 +298,7 @@ export function percentage(
     ) {
       throw error;
     }
-    throw new Error("Invalid input: both values must be valid numbers");
+    throw new Error("Invalid input: both values must be valid numbers", { cause: error });
   }
 }
 
