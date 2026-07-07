@@ -26,14 +26,15 @@ export function toScientific(value: number | string, sigfigs?: number): string {
     throw new Error("Invalid input: value must be a valid number");
   }
 
+  if (sigfigs !== undefined) {
+    validateSigfigs(sigfigs);
+  }
+
   if (num === 0) {
     return sigfigs ? `0.${"0".repeat(sigfigs - 1)}e+0` : "0e+0";
   }
 
   const actualSigfigs = sigfigs || sigfigOf(value);
-  if (sigfigs !== undefined) {
-    validateSigfigs(sigfigs);
-  }
 
   // Convert to the specified significant figures using toSigfig
   const rounded = toSigfig(num, actualSigfigs);
@@ -65,26 +66,27 @@ export function toEngineering(value: number | string, sigfigs?: number): string 
     throw new Error("Invalid input: value must be a valid number");
   }
 
+  if (sigfigs !== undefined) {
+    validateSigfigs(sigfigs);
+  }
+
   if (num === 0) {
     return sigfigs ? `0.${"0".repeat(sigfigs - 1)}e+0` : "0e+0";
   }
 
   const actualSigfigs = sigfigs || sigfigOf(value);
-  if (sigfigs !== undefined) {
-    validateSigfigs(sigfigs);
-  }
-  const sign = num < 0 ? "-" : "";
-  const absNum = Math.abs(num);
+  const bigValue = new Big(value);
+  const sign = bigValue.s === -1 ? "-" : "";
+  const bigAbs = bigValue.abs();
 
-  // Find the appropriate power of 3
-  const log10 = Math.log10(absNum);
-  const engineeringExponent = Math.floor(log10 / 3) * 3;
+  // Find the appropriate power of 3 using Big.js' decimal exponent.
+  const engineeringExponent = Math.floor(bigAbs.e / 3) * 3;
 
-  // Calculate the coefficient
-  const coefficient = absNum / Math.pow(10, engineeringExponent);
+  // Calculate the coefficient using Big.js to preserve precision
+  const bigCoefficient = bigAbs.div(new Big(10).pow(engineeringExponent));
 
-  // Format the coefficient with appropriate significant figures
-  const formattedCoeff = parseFloat(coefficient.toPrecision(actualSigfigs));
+  // Format the coefficient with appropriate significant figures via Big.js
+  const formattedCoeff = new Big(bigCoefficient.toPrecision(actualSigfigs)).toFixed();
 
   return `${sign}${formattedCoeff}e${engineeringExponent >= 0 ? "+" : ""}${engineeringExponent}`;
 }
@@ -147,25 +149,26 @@ export function round(
   const scientificMatch = strWithExtraPrecision.match(/^(\d)\.?(\d*)e([+-]?\d+)$/i);
   if (scientificMatch) {
     // For scientific notation, extract the coefficient digits
-    digits = scientificMatch[1] + (scientificMatch[2] || "");
+    digits = scientificMatch[1] + scientificMatch[2];
   } else {
     // For regular notation, just remove the decimal point
     digits = strWithExtraPrecision.replace(".", "");
   }
 
   // The digit we need to check is at position sigfigs (0-indexed)
-  const checkDigit = parseInt(digits[sigfigs] || "0", 10);
+  const checkDigit = parseInt(digits[sigfigs], 10);
 
   // Calculate the magnitude and position for rounding
-  const magnitude = absNum.eq(0) ? 0 : Math.floor(Math.log10(absNum.toNumber()));
+  const magnitude = Math.floor(Math.log10(absNum.toNumber()));
   const roundPosition = magnitude - sigfigs + 1;
 
   // Scale the number so we can truncate it
   const scaleFactor = new Big(10).pow(-roundPosition);
   const scaled = absNum.times(scaleFactor);
 
-  // Truncate (round down) to get the base value
-  const truncated = new Big(Math.floor(scaled.toNumber()));
+  // Truncate (round down) to get the base value — use Big.js ROUND_DOWN to avoid
+  // float precision loss that would occur with Math.floor(scaled.toNumber())
+  const truncated = scaled.round(0, 0);
 
   // Decide whether to round up or down based on the threshold
   let result: Big;
@@ -221,8 +224,9 @@ export function truncate(value: number | string, sigfigs: number): string {
   const scaleFactor = new Big(10).pow(-truncatePosition);
   const scaled = absNum.times(scaleFactor);
 
-  // Truncate (round down) to get the base value
-  const truncated = new Big(Math.floor(scaled.toNumber()));
+  // Truncate (round down) to get the base value — use Big.js ROUND_DOWN to avoid
+  // float precision loss that would occur with Math.floor(scaled.toNumber())
+  const truncated = scaled.round(0, 0);
 
   // Scale back
   let result = truncated.div(scaleFactor);
@@ -247,11 +251,11 @@ export function truncate(value: number | string, sigfigs: number): string {
  *
  * @example
  * ```typescript
- * percentage(25, 100)           // "25%"
- * percentage(1, 3)              // "33.3%"
+ * percentage("25", "100.0")     // "25%"
+ * percentage("1.0", "3.0")      // "33%"
  * percentage(1, 3, 2)           // "33%"
  * percentage(1, 3, { sigfigs: 4 }) // "33.33%"
- * percentage(1, 3, { appendPercent: false }) // "33.3"
+ * percentage("1.0", "3.0", { appendPercent: false }) // "33"
  * ```
  */
 export function percentage(

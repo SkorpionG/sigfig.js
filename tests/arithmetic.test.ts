@@ -2,7 +2,7 @@
  * Tests for arithmetic operations with significant figures
  */
 
-import { add, sub, mul, div, mod, idiv, pow, sqrt, abs, max, min } from "../src/arithmetic";
+import { add, sub, mul, div, mod, idiv, pow, sqrt, abs, max, min } from "../src/arithmetic.js";
 
 describe("add", () => {
   test("adds numbers with proper significant figure handling", () => {
@@ -124,6 +124,11 @@ describe("mod", () => {
   test("throws error for modulo by zero", () => {
     expect(() => mod(5, 0)).toThrow("Division by zero: modulo by zero is undefined");
   });
+
+  test("throws error for invalid inputs", () => {
+    expect(() => mod("invalid", 5)).toThrow("Invalid input: both operands must be valid numbers");
+    expect(() => mod(5, "invalid")).toThrow("Invalid input: both operands must be valid numbers");
+  });
 });
 
 describe("idiv", () => {
@@ -134,17 +139,39 @@ describe("idiv", () => {
   });
 
   test("handles negative numbers correctly", () => {
-    expect(parseFloat(idiv(-10, 3))).toBe(-4); // Floor division
+    // Floor division must be correctly applied to negative numbers,
+    // not just truncation toward zero.
+    expect(parseFloat(idiv(-10, 3))).toBe(-4);
     expect(parseFloat(idiv(10, -3))).toBe(-4);
     expect(parseFloat(idiv(-10, -3))).toBe(3);
+
+    // Additional exact division cases
+    expect(parseFloat(idiv(-12, 3))).toBe(-4);
+    expect(parseFloat(idiv(12, -3))).toBe(-4);
+    expect(parseFloat(idiv(-12, -3))).toBe(4);
+
+    // Additional fractional cases
+    expect(parseFloat(idiv(-7, 2))).toBe(-4);
+    expect(parseFloat(idiv(7, -2))).toBe(-4);
+    expect(parseFloat(idiv(-6, -3))).toBe(2);
   });
 
   test("respects custom sigfig parameter", () => {
     expect(parseFloat(idiv(22.0, 7.0, 2))).toBeCloseTo(3.0, 1);
   });
 
+  test("preserves precision for very large integer division", () => {
+    expect(idiv("90071992547409931234", "1", 20)).toBe("90071992547409931234");
+    expect(idiv("-999999999999999999999", "1000000000000000000000")).toBe("-1");
+  });
+
   test("throws error for division by zero", () => {
     expect(() => idiv(5, 0)).toThrow("Division by zero is not allowed");
+  });
+
+  test("throws error for invalid inputs", () => {
+    expect(() => idiv("invalid", 5)).toThrow("Invalid input: both operands must be valid numbers");
+    expect(() => idiv(5, "invalid")).toThrow("Invalid input: both operands must be valid numbers");
   });
 });
 
@@ -171,6 +198,22 @@ describe("pow", () => {
 
   test("throws error for invalid results", () => {
     expect(() => pow(0, -1)).toThrow("Power operation resulted in infinite or invalid result");
+    // Non-integer exponent producing NaN (imaginary result) also throws
+    expect(() => pow(-1, 0.5)).toThrow("Power operation resulted in infinite or invalid result");
+  });
+
+  test("respects toSigfigParam for non-integer exponents", () => {
+    // pow(2, 0.5) = sqrt(2) ≈ 1.41421…; with 4 sig figs → "1.414"
+    expect(parseFloat(pow(2, 0.5, 4))).toBeCloseTo(1.414, 3);
+  });
+
+  test("throws error for invalid inputs", () => {
+    expect(() => pow("invalid", 2)).toThrow(
+      "Invalid input: both base and exponent must be valid numbers"
+    );
+    expect(() => pow(2, "invalid")).toThrow(
+      "Invalid input: both base and exponent must be valid numbers"
+    );
   });
 });
 
@@ -193,6 +236,10 @@ describe("sqrt", () => {
   test("throws error for negative numbers", () => {
     expect(() => sqrt(-4)).toThrow("Cannot take square root of negative number");
   });
+
+  test("throws error for invalid inputs", () => {
+    expect(() => sqrt("invalid")).toThrow("Invalid input: value must be a valid number");
+  });
 });
 
 describe("abs", () => {
@@ -209,6 +256,15 @@ describe("abs", () => {
 
   test("respects significant figures", () => {
     expect(abs("-5.0")).toBe("5.0"); // Use string input to preserve trailing zero
+  });
+
+  test("respects toSigfigParam override", () => {
+    expect(abs(-3.14159, 3)).toBe("3.14");
+    expect(abs("-5.00", 2)).toBe("5.0");
+  });
+
+  test("throws error for invalid inputs", () => {
+    expect(() => abs("invalid")).toThrow("Invalid input: value must be a valid number");
   });
 });
 

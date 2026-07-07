@@ -3,8 +3,8 @@
  * Ensures that sigfigOf(toSigfig(value, n)) === n
  */
 
-import { sigfigOf, toSigfig, toPrecision } from "../src/sigfig";
-import { toScientific, toExponential, toFixed } from "../src/formatting";
+import { sigfigOf, toSigfig, toPrecision } from "../src/sigfig.js";
+import { toScientific, toExponential, toFixed } from "../src/formatting.js";
 
 describe("toSigfig consistency with sigfigOf", () => {
   describe("verifies that sigfigOf(toSigfig(value, n)) === n", () => {

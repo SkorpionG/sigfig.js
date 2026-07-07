@@ -226,9 +226,17 @@ export function idiv(a: number | string, b: number | string, toSigfigParam?: num
       throw new Error("Division by zero is not allowed");
     }
 
-    // Perform precise division and floor using big.js
-    const divResult = bigA.div(bigB);
-    const result = Math.floor(parseFloat(divResult.toString()));
+    // Perform floor division entirely within Big.js to preserve arbitrary precision.
+    // Using Math.floor(parseFloat(...)) would lose precision for very large numbers.
+    // First compute the integer quotient toward zero from the exact remainder,
+    // then adjust for negative fractional results to get mathematical floor.
+    const remainder = bigA.mod(bigB);
+    const truncated = bigA.minus(remainder).div(bigB);
+    // If there's a remainder AND the result is negative, floor is one less than truncation
+    const hasRemainder = !remainder.eq(0);
+    const isNegativeResult = (bigA.s === -1) !== (bigB.s === -1);
+    const result =
+      hasRemainder && isNegativeResult ? truncated.minus(1).toString() : truncated.toString();
 
     if (toSigfigParam !== undefined) {
       return toSigfig(result, toSigfigParam);
@@ -248,7 +256,11 @@ export function idiv(a: number | string, b: number | string, toSigfigParam?: num
 /**
  * Power operation with significant figure handling
  * Uses Big.js pow() for precise calculations with integer exponents
- * Falls back to Math.pow for non-integer exponents
+ *
+ * **Note on precision for non-integer exponents**: When the exponent is not an integer
+ * (e.g. `pow(2, 0.5)`), this function falls back to `Math.pow`, which uses standard
+ * IEEE 754 floating-point arithmetic and does NOT guarantee arbitrary precision.
+ * For square roots, prefer `sqrt()` which uses Big.js natively.
  *
  * @param base - Base number
  * @param exponent - Exponent (integer or decimal)

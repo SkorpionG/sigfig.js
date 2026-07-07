@@ -25,16 +25,16 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch",
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.js",
     "lint:fix": "eslint . --ext .ts,.js --fix",
-    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "check": "npm run typecheck && npm run format:check && npm run lint && npm run test",
     "validate": "npm run typecheck && npm run lint && npm run test",
     "prepublishOnly": "npm run build && npm run validate",
@@ -52,27 +52,27 @@
   ],
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/big.js": "^6.2.2",
+    "@types/big.js": "^7.0.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.5.2",
-    "@typescript-eslint/eslint-plugin": "^8.58.1",
-    "@typescript-eslint/parser": "^8.58.1",
-    "eslint": "^10.2.0",
+    "@types/node": "^26.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.63.0",
+    "@typescript-eslint/parser": "^8.63.0",
+    "eslint": "^10.6.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-prettier": "^5.5.6",
     "husky": "^9.1.7",
-    "jest": "^30.3.0",
-    "lint-staged": "^16.4.0",
-    "prettier": "^3.8.1",
-    "ts-jest": "^29.4.9",
+    "jest": "^30.4.2",
+    "lint-staged": "^17.0.8",
+    "prettier": "^3.9.4",
+    "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.3"
   },
   "dependencies": {
     "big.js": "^7.0.1"
   },
   "engines": {
-    "node": ">=16.0.0",
+    "node": "^20.19.0 || ^22.13.0 || >=24.0.0",
     "npm": ">=7.0.0"
   }
 }

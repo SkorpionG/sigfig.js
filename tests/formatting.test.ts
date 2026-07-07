@@ -10,7 +10,7 @@ import {
   truncate,
   digitsAfterDecimal,
   toDigitsAfterDecimal,
-} from "../src/formatting";
+} from "../src/formatting.js";
 
 describe("toScientific", () => {
   test("formats numbers in scientific notation", () => {
@@ -22,6 +22,7 @@ describe("toScientific", () => {
   test("respects custom significant figures", () => {
     expect(toScientific(1234, 2)).toBe("1.2e+3");
     expect(toScientific(0.00123, 4)).toBe("1.230e-3");
+    expect(toScientific(0, 3)).toBe("0.00e+0");
   });
 
   test("handles negative numbers", () => {
@@ -36,6 +37,15 @@ describe("toScientific", () => {
 
   test("throws error for invalid inputs", () => {
     expect(() => toScientific("invalid")).toThrow("Invalid input: value must be a valid number");
+    expect(() => toScientific(1234, 0)).toThrow(
+      "Number of significant figures must be a positive integer"
+    );
+    expect(() => toScientific(1234, -1)).toThrow(
+      "Number of significant figures must be a positive integer"
+    );
+    expect(() => toScientific(1234, 2.5)).toThrow(
+      "Number of significant figures must be a positive integer"
+    );
   });
 });
 
@@ -52,6 +62,10 @@ describe("toEngineering", () => {
     expect(toEngineering(0.000123, 2)).toBe("120e-6");
   });
 
+  test("preserves precision for large string inputs", () => {
+    expect(toEngineering("90071992547409931234", 20)).toBe("90.071992547409931234e+18");
+  });
+
   test("handles negative numbers", () => {
     expect(toEngineering(-1234)).toBe("-1.234e+3");
     expect(toEngineering(-0.00123)).toBe("-1.23e-3");
@@ -64,6 +78,15 @@ describe("toEngineering", () => {
 
   test("throws error for invalid inputs", () => {
     expect(() => toEngineering("invalid")).toThrow("Invalid input: value must be a valid number");
+    expect(() => toEngineering(1234, 0)).toThrow(
+      "Number of significant figures must be a positive integer"
+    );
+    expect(() => toEngineering(1234, -1)).toThrow(
+      "Number of significant figures must be a positive integer"
+    );
+    expect(() => toEngineering(1234, 2.5)).toThrow(
+      "Number of significant figures must be a positive integer"
+    );
   });
 });
 
@@ -125,11 +148,10 @@ describe("round", () => {
   });
 
   test("edge cases that were previously broken", () => {
-    // These cases were returning incorrect values before the fix
-    expect(round(3.14159, 3, 9)).toBe("3.14"); // Was returning "0.00"
-    expect(round(3.1415, 3, 9)).toBe("3.14"); // Was returning "0.00"
-    expect(round(3.14959, 3, 9)).toBe("3.15"); // Was returning "100"
-    expect(round(0.001294, 2, 9)).toBe("0.0012"); // Was returning "0.0"
+    expect(round(3.14159, 3, 9)).toBe("3.14");
+    expect(round(3.1415, 3, 9)).toBe("3.14");
+    expect(round(3.14959, 3, 9)).toBe("3.15");
+    expect(round(0.001294, 2, 9)).toBe("0.0012");
 
     // Additional edge cases with small numbers
     expect(round(0.001234, 2, 0)).toBe("0.0013"); // Always rounds up
@@ -155,6 +177,16 @@ describe("round", () => {
     expect(() => round(123, 3, 3.5)).toThrow(
       "Rounding threshold must be an integer between 0 and 9"
     );
+  });
+
+  test("covers scientific-notation path in digit extraction for large numbers", () => {
+    // A very large number forced through the custom-threshold path produces a
+    // scientific-notation string internally; this exercises the scientificMatch
+    // branch at the digit-extraction step.
+    expect(round("1e18", 1, 9)).toBe("1e+18");
+    expect(round(99999999999, 4, 3)).toBe("1.000e+11");
+    expect(round(12345678901, 3, 9)).toBe("1.23e+10");
+    expect(round(123456789, 5, 0)).toBe("1.2346e+8"); // always rounds up (threshold 0)
   });
 });
 
@@ -183,6 +215,10 @@ describe("percentage", () => {
   test("can return without percentage sign", () => {
     expect(percentage(25, 100, { appendPercent: false })).toBe("3e+1");
     expect(percentage(1, 3, { sigfigs: 4, appendPercent: false })).toBe("33.33");
+  });
+
+  test("can use options object while keeping percentage sign", () => {
+    expect(percentage(1, 3, { sigfigs: 4 })).toBe("33.33%");
   });
 
   test("throws error for division by zero", () => {
@@ -241,6 +277,11 @@ describe("truncate", () => {
     expect(truncate(199.9, 2)).toBe("1.9e+2"); // truncate
     expect(round(199.9, 2)).toBe("2.0e+2"); // round
   });
+
+  test("truncates large numbers correctly", () => {
+    expect(truncate(123456789, 4)).toBe("1.234e+8");
+    expect(truncate(999999999, 3)).toBe("9.99e+8");
+  });
 });
 
 describe("digitsAfterDecimal", () => {
@@ -293,6 +334,17 @@ describe("digitsAfterDecimal", () => {
       "Invalid input: value must be a valid number"
     );
     expect(() => digitsAfterDecimal(NaN)).toThrow("Invalid input: value must be a valid number");
+  });
+
+  test("handles number-typed scientific notation with large exponents correctly", () => {
+    // 1e-200 → 200 digits after decimal (the coefficient is "1" with exponent -200)
+    expect(digitsAfterDecimal(1e-200)).toBe(200);
+    // 1e20 → 0 digits after decimal (positive exponent shifts left)
+    expect(digitsAfterDecimal(1e20)).toBe(0);
+  });
+
+  test("falls back for parseable but incomplete scientific notation strings", () => {
+    expect(digitsAfterDecimal("1e")).toBe(0);
   });
 });
 

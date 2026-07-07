@@ -7,7 +7,7 @@ import {
   toSigfig,
   getDecimalPlacesForAddOrSub,
   getSigfigForMulOrDiv,
-} from "../src/sigfig";
+} from "../src/sigfig.js";
 
 describe("sigfigOf", () => {
   describe("Rule 1: All non-zero digits are always significant", () => {
@@ -82,6 +82,7 @@ describe("sigfigOf", () => {
     test("handles zero", () => {
       expect(sigfigOf(0)).toBe(1);
       expect(sigfigOf("0")).toBe(1);
+      expect(sigfigOf("000")).toBe(1);
       expect(sigfigOf("0.0")).toBe(1);
       expect(sigfigOf("0.00")).toBe(1);
     });
@@ -196,6 +197,11 @@ describe("getDecimalPlacesForAddOrSub", () => {
   test("handles multiple operands", () => {
     expect(getDecimalPlacesForAddOrSub([1.234, 2.56, 3.7])).toBe(1); // 3.7 has 1 decimal place
     expect(getDecimalPlacesForAddOrSub([1.2345, 2.345, 3.45, 4.5])).toBe(1); // 4.5 is least precise
+  });
+
+  test("returns 0 for empty array (Infinity guard)", () => {
+    // With no inputs, minDecimalPlaces stays Infinity; the guard returns 0 safely
+    expect(getDecimalPlacesForAddOrSub([])).toBe(0);
   });
 });
 

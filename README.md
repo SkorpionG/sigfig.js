@@ -28,12 +28,14 @@ A TypeScript/JavaScript package for precise mathematical calculations with prope
 - **Precise Arithmetic**: Perform addition, subtraction, multiplication, division, modulo, power, and more while preserving significant figures according to scientific standards
 - **Scientific Formatting**: Format numbers in scientific notation, engineering notation, percentages, rounding, and truncation
 - **Flexible Input**: Accept both numbers and strings as input
-- **String Output**: All arithmetic and formatting functions return strings to preserve precision
+- **String Output**: Arithmetic and precision-formatting helpers return strings to preserve precision
 - **TypeScript Support**: Full TypeScript support with type definitions
 - **Scientific Standards**: Follows established scientific rules for significant figures
 - **Input Validation**: Comprehensive validation for significant figures parameters
 
 ## Installation
+
+Requires Node.js `^20.19.0 || ^22.13.0 || >=24.0.0` and npm `>=7.0.0`.
 
 ```bash
 npm install sigfig.js
@@ -76,19 +78,19 @@ For convenience and familiarity, the package provides intuitive aliases for comm
 // Arithmetic aliases (matching big.js naming)
 import { plus, minus, times, divide, modulo, power } from "sigfig.js";
 
-plus(0.1, 0.2); // 0.3 (alias for add)
-minus(0.3, 0.1); // 0.2 (alias for sub)
-times(2, 3); // 6 (alias for mul)
-divide(10, 2); // 5 (alias for div)
-modulo(10, 3); // 1 (alias for mod)
-power(2, 3); // 8 (alias for pow)
+plus(0.1, 0.2); // "0.3" (alias for add)
+minus(0.3, 0.1); // "0.2" (alias for sub)
+times(2, 3); // "6" (alias for mul)
+divide(10, 2); // "5" (alias for div)
+modulo(10, 3); // "1" (alias for mod)
+power(2, 3); // "8" (alias for pow)
 
 // Formatting aliases (matching JavaScript native methods)
 import { toPrecision, toExponential, toFixed } from "sigfig.js";
 
-toPrecision(3.14159, 3); // 3.14 (alias for toSigfig)
+toPrecision(3.14159, 3); // "3.14" (alias for toSigfig)
 toExponential(1234); // "1.234e+3" (alias for toScientific)
-toFixed(3.14159, 2); // 3.14 (alias for toDigitsAfterDecimal)
+toFixed(3.14159, 2); // "3.14" (alias for toDigitsAfterDecimal)
 ```
 
 **Available Aliases:**
@@ -140,7 +142,7 @@ console.log(truncate(123.999, 3)); // "123" (no rounding)
 
 // Scientific formatting
 console.log(toScientific(1234)); // "1.234e+3"
-console.log(percentage(25, 100)); // "25%"
+console.log(percentage("25", "100.0")); // "25%"
 ```
 
 ## API Reference
@@ -342,11 +344,11 @@ truncate(0.001234, 2); // "0.0012"
 Calculates percentage with proper significant figure handling.
 
 ```javascript
-percentage(25, 100); // "25%"
-percentage(1, 3); // "33.3%"
+percentage("25", "100.0"); // "25%"
+percentage("1.0", "3.0"); // "33%"
 percentage(1, 3, 2); // "33%"
 percentage(1, 3, { sigfigs: 4 }); // "33.33%"
-percentage(1, 3, { appendPercent: false }); // "33.3"
+percentage("1.0", "3.0", { appendPercent: false }); // "33"
 ```
 
 #### `toDigitsAfterDecimal(value: number | string, digits: number): string`

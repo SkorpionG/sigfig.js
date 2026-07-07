@@ -10,6 +10,10 @@ export default {
       "ts-jest",
       {
         useESM: true,
+        // NodeNext emits TS151002 in ts-jest, but isolatedModules breaks this ESM transform.
+        diagnostics: {
+          ignoreCodes: [151002],
+        },
       },
     ],
   },
